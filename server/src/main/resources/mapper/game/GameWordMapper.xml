@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.homefun.modules.game.mapper.GameWordMapper">
+
+    <select id="selectWordList" resultType="com.homefun.modules.game.domain.GameWord">
+        SELECT * FROM game_word WHERE del_flag = '0'
+        <if test="word != null and word != ''">
+            AND word LIKE CONCAT('%', #{word}, '%')
+        </if>
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="difficulty != null and difficulty != ''">
+            AND difficulty = #{difficulty}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectWordById" resultType="com.homefun.modules.game.domain.GameWord">
+        SELECT * FROM game_word WHERE id = #{id}
+    </select>
+
+    <insert id="insertWord" parameterType="com.homefun.modules.game.domain.GameWord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO game_word (
+            word, category, difficulty, hint, play_count, status,
+            create_by, create_time, remark
+        ) VALUES (
+            #{word}, #{category}, #{difficulty}, #{hint}, #{playCount}, #{status},
+            #{createBy}, NOW(), #{remark}
+        )
+    </insert>
+
+    <update id="updateWord" parameterType="com.homefun.modules.game.domain.GameWord">
+        UPDATE game_word SET
+            word = #{word},
+            category = #{category},
+            difficulty = #{difficulty},
+            hint = #{hint},
+            status = #{status},
+            update_time = NOW()
+        <if test="remark != null">
+            , remark = #{remark}
+        </if>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteWordById">
+        UPDATE game_word SET del_flag = '1' WHERE id = #{id}
+    </update>
+
+    <select id="selectRandomWords" resultType="com.homefun.modules.game.domain.GameWord">
+        SELECT * FROM game_word
+        WHERE del_flag = '0' AND status = '0'
+        <if test="difficulty != null and difficulty != ''">
+            AND difficulty = #{difficulty}
+        </if>
+        ORDER BY RAND() LIMIT #{count}
+    </select>
+
+</mapper>

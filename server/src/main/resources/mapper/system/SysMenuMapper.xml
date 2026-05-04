@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.homefun.modules.system.mapper.SysMenuMapper">
+
+    <select id="selectMenuList" resultType="com.homefun.modules.system.domain.SysMenu">
+        SELECT * FROM sys_menu WHERE del_flag = '0'
+        <if test="menuName != null and menuName != ''">
+            AND menu_name LIKE CONCAT('%', #{menuName}, '%')
+        </if>
+        <if test="visible != null and visible != ''">
+            AND visible = #{visible}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY parent_id, order_num
+    </select>
+
+    <select id="selectMenusByUserId" resultType="com.homefun.modules.system.domain.SysMenu">
+        SELECT DISTINCT m.* FROM sys_menu m
+        LEFT JOIN sys_role_menu rm ON m.id = rm.menu_id
+        LEFT JOIN sys_user_role ur ON rm.role_id = ur.role_id
+        LEFT JOIN sys_role r ON r.id = ur.role_id
+        WHERE m.del_flag = '0' AND r.del_flag = '0'
+        AND ur.user_id = #{userId}
+        ORDER BY m.parent_id, m.order_num
+    </select>
+
+    <select id="selectMenuById" resultType="com.homefun.modules.system.domain.SysMenu">
+        SELECT * FROM sys_menu WHERE id = #{id}
+    </select>
+
+    <select id="selectChildrenMenuById" resultType="com.homefun.modules.system.domain.SysMenu">
+        SELECT * FROM sys_menu WHERE del_flag = '0' AND parent_id = #{id}
+    </select>
+
+    <select id="selectMenuListByRoleId" resultType="java.lang.Long">
+        SELECT m.id FROM sys_menu m
+        LEFT JOIN sys_role_menu rm ON m.id = rm.menu_id
+        WHERE rm.role_id = #{roleId}
+    </select>
+
+    <insert id="insertMenu" parameterType="com.homefun.modules.system.domain.SysMenu" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_menu (
+            menu_name, parent_id, order_num, path, component, query,
+            is_frame, is_cache, menu_type, visible, status, perms, icon,
+            create_by, create_time, remark
+        ) VALUES (
+            #{menuName}, #{parentId}, #{orderNum}, #{path}, #{component}, #{query},
+            #{isFrame}, #{isCache}, #{menuType}, #{visible}, #{status}, #{perms}, #{icon},
+            #{createBy}, NOW(), #{remark}
+        )
+    </insert>
+
+    <update id="updateMenu" parameterType="com.homefun.modules.system.domain.SysMenu">
+        UPDATE sys_menu SET
+            menu_name = #{menuName},
+            parent_id = #{parentId},
+            order_num = #{orderNum},
+            path = #{path},
+            component = #{component},
+            query = #{query},
+            is_frame = #{isFrame},
+            is_cache = #{isCache},
+            menu_type = #{menuType},
+            visible = #{visible},
+            status = #{status},
+            perms = #{perms},
+            icon = #{icon},
+            update_by = #{updateBy},
+            update_time = NOW()
+        <if test="remark != null">
+            , remark = #{remark}
+        </if>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteMenuById">
+        UPDATE sys_menu SET del_flag = '1' WHERE id = #{id}
+    </delete>
+
+</mapper>

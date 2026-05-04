@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.homefun.modules.media.mapper.MediaContentMapper">
+
+    <select id="selectContentList" resultType="com.homefun.modules.media.domain.MediaContent">
+        SELECT c.*, m.name as category_name
+        FROM media_content c
+        LEFT JOIN media_category m ON c.category_id = m.id
+        WHERE c.del_flag = '0'
+        <if test="title != null and title != ''">
+            AND c.title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        <if test="type != null and type != ''">
+            AND c.type = #{type}
+        </if>
+        <if test="categoryId != null">
+            AND c.category_id = #{categoryId}
+        </if>
+        <if test="status != null and status != ''">
+            AND c.status = #{status}
+        </if>
+        ORDER BY c.create_time DESC
+    </select>
+
+    <select id="selectContentById" resultType="com.homefun.modules.media.domain.MediaContent">
+        SELECT c.*, m.name as category_name
+        FROM media_content c
+        LEFT JOIN media_category m ON c.category_id = m.id
+        WHERE c.id = #{id}
+    </select>
+
+    <insert id="insertContent" parameterType="com.homefun.modules.media.domain.MediaContent" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO media_content (
+            title, type, category_id, cover_url, media_url, duration, description,
+            director, actors, year, rating, view_count, favorite_count, status,
+            create_by, create_time, remark
+        ) VALUES (
+            #{title}, #{type}, #{categoryId}, #{coverUrl}, #{mediaUrl}, #{duration}, #{description},
+            #{director}, #{actors}, #{year}, #{rating}, #{viewCount}, #{favoriteCount}, #{status},
+            #{createBy}, NOW(), #{remark}
+        )
+    </insert>
+
+    <update id="updateContent" parameterType="com.homefun.modules.media.domain.MediaContent">
+        UPDATE media_content SET
+            title = #{title},
+            type = #{type},
+            category_id = #{categoryId},
+            cover_url = #{coverUrl},
+            media_url = #{mediaUrl},
+            duration = #{duration},
+            description = #{description},
+            director = #{director},
+            actors = #{actors},
+            year = #{year},
+            rating = #{rating},
+            status = #{status},
+            update_time = NOW()
+        <if test="remark != null">
+            , remark = #{remark}
+        </if>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteContentById">
+        UPDATE media_content SET del_flag = '1' WHERE id = #{id}
+    </update>
+
+    <select id="selectContentByCategoryId" resultType="com.homefun.modules.media.domain.MediaContent">
+        SELECT * FROM media_content WHERE category_id = #{categoryId} AND del_flag = '0' AND status = '0'
+        ORDER BY create_time DESC
+    </select>
+
+    <update id="incrementViewCount">
+        UPDATE media_content SET view_count = view_count + 1 WHERE id = #{id}
+    </update>
+
+    <update id="incrementFavoriteCount">
+        UPDATE media_content SET favorite_count = favorite_count + 1 WHERE id = #{id}
+    </update>
+
+</mapper>

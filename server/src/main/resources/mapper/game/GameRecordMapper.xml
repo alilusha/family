@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.homefun.modules.game.mapper.GameRecordMapper">
+
+    <select id="selectRecordList" resultType="com.homefun.modules.game.domain.GameRecord">
+        SELECT * FROM game_record
+        <where>
+            <if test="gameType != null and gameType != ''">
+                AND game_type = #{gameType}
+            </if>
+            <if test="familyId != null">
+                AND family_id = #{familyId}
+            </if>
+            <if test="familyName != null and familyName != ''">
+                AND family_name LIKE CONCAT('%', #{familyName}, '%')
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectRecordById" resultType="com.homefun.modules.game.domain.GameRecord">
+        SELECT * FROM game_record WHERE id = #{id}
+    </select>
+
+    <insert id="insertRecord" parameterType="com.homefun.modules.game.domain.GameRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO game_record (
+            game_type, game_name, family_id, family_name, room_id,
+            duration, participant_count, total_score, winner_name, game_data, create_time
+        ) VALUES (
+            #{gameType}, #{gameName}, #{familyId}, #{familyName}, #{roomId},
+            #{duration}, #{participantCount}, #{totalScore}, #{winnerName}, #{gameData}, NOW()
+        )
+    </insert>
+
+    <select id="selectRecordsByFamilyId" resultType="com.homefun.modules.game.domain.GameRecord">
+        SELECT * FROM game_record WHERE family_id = #{familyId} ORDER BY create_time DESC
+    </select>
+
+</mapper>

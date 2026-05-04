@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.homefun.modules.game.mapper.GameQuestionMapper">
+
+    <select id="selectQuestionList" resultType="com.homefun.modules.game.domain.GameQuestion">
+        SELECT * FROM game_question WHERE del_flag = '0'
+        <if test="question != null and question != ''">
+            AND question LIKE CONCAT('%', #{question}, '%')
+        </if>
+        <if test="category != null and category != ''">
+            AND category = #{category}
+        </if>
+        <if test="difficulty != null and difficulty != ''">
+            AND difficulty = #{difficulty}
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectQuestionById" resultType="com.homefun.modules.game.domain.GameQuestion">
+        SELECT * FROM game_question WHERE id = #{id}
+    </select>
+
+    <insert id="insertQuestion" parameterType="com.homefun.modules.game.domain.GameQuestion" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO game_question (
+            question, category, options, answer, difficulty, explanation,
+            play_count, correct_count, status,
+            create_by, create_time, remark
+        ) VALUES (
+            #{question}, #{category}, #{options}, #{answer}, #{difficulty}, #{explanation},
+            #{playCount}, #{correctCount}, #{status},
+            #{createBy}, NOW(), #{remark}
+        )
+    </insert>
+
+    <update id="updateQuestion" parameterType="com.homefun.modules.game.domain.GameQuestion">
+        UPDATE game_question SET
+            question = #{question},
+            category = #{category},
+            options = #{options},
+            answer = #{answer},
+            difficulty = #{difficulty},
+            explanation = #{explanation},
+            status = #{status},
+            update_time = NOW()
+        <if test="remark != null">
+            , remark = #{remark}
+        </if>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteQuestionById">
+        UPDATE game_question SET del_flag = '1' WHERE id = #{id}
+    </update>
+
+    <select id="selectRandomQuestions" resultType="com.homefun.modules.game.domain.GameQuestion">
+        SELECT * FROM game_question
+        WHERE del_flag = '0' AND status = '0'
+        <if test="difficulty != null and difficulty != ''">
+            AND difficulty = #{difficulty}
+        </if>
+        ORDER BY RAND() LIMIT #{count}
+    </select>
+
+</mapper>

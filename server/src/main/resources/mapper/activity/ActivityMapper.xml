@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.homefun.modules.activity.mapper.ActivityMapper">
+
+    <select id="selectActivityList" resultType="com.homefun.modules.activity.domain.Activity">
+        SELECT * FROM activity WHERE del_flag = '0'
+        <if test="title != null and title != ''">
+            AND title LIKE CONCAT('%', #{title}, '%')
+        </if>
+        <if test="familyId != null">
+            AND family_id = #{familyId}
+        </if>
+        <if test="familyName != null and familyName != ''">
+            AND family_name LIKE CONCAT('%', #{familyName}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY activity_time DESC
+    </select>
+
+    <select id="selectActivityById" resultType="com.homefun.modules.activity.domain.Activity">
+        SELECT * FROM activity WHERE id = #{id}
+    </select>
+
+    <insert id="insertActivity" parameterType="com.homefun.modules.activity.domain.Activity" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO activity (
+            title, family_id, family_name, activity_time, location, description,
+            cover_url, participant_ids, max_participants, participant_count, status,
+            create_by, create_time, remark
+        ) VALUES (
+            #{title}, #{familyId}, #{familyName}, #{activityTime}, #{location}, #{description},
+            #{coverUrl}, #{participantIds}, #{maxParticipants}, #{participantCount}, #{status},
+            #{createBy}, NOW(), #{remark}
+        )
+    </insert>
+
+    <update id="updateActivity" parameterType="com.homefun.modules.activity.domain.Activity">
+        UPDATE activity SET
+            title = #{title},
+            family_id = #{familyId},
+            family_name = #{familyName},
+            activity_time = #{activityTime},
+            location = #{location},
+            description = #{description},
+            cover_url = #{coverUrl},
+            participant_ids = #{participantIds},
+            max_participants = #{maxParticipants},
+            participant_count = #{participantCount},
+            status = #{status},
+            update_time = NOW()
+        <if test="remark != null">
+            , remark = #{remark}
+        </if>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteActivityById">
+        UPDATE activity SET del_flag = '1' WHERE id = #{id}
+    </update>
+
+    <select id="selectActivityByFamilyId" resultType="com.homefun.modules.activity.domain.Activity">
+        SELECT * FROM activity WHERE family_id = #{familyId} AND del_flag = '0'
+        ORDER BY activity_time DESC
+    </select>
+
+    <select id="selectUpcomingActivities" resultType="com.homefun.modules.activity.domain.Activity">
+        SELECT * FROM activity
+        WHERE del_flag = '0' AND status = '0'
+        AND activity_time >= NOW()
+        ORDER BY activity_time ASC
+        LIMIT #{limit}
+    </select>
+
+</mapper>
